@@ -140,6 +140,8 @@
         });
 
         // AJAX
+        ///
+        ///此段114-161可註解///
         function generateStarMap(lat, lon) {
             $.ajax({
                 url: '/generate_star_map',
@@ -155,6 +157,17 @@
                     console.log('Error:', error);
                 }
             });
+        }
+        ///
+        function generateStarMap(lat, lon, magnitude, constellation) {
+            fetch(`/stars/?lat=${lat}&lon=${lon}&magnitude=${magnitude}&constellation=${constellation}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
         }
 
         function updateStarMap(data) {
