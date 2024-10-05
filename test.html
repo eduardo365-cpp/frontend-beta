@@ -179,17 +179,16 @@
                 },
                 type: 'scatter'
             };
-
-           
             Plotly.newPlot(starMap, [trace]);
-
-            
-            starMap.on('plotly_click', (data) => {
-                const starIndex = data.points[0].pointIndex;
-                const star = data.stars[starIndex];
+            const stars = data.stars;
+            starMap.on('plotly_click', (eventData) => {
+                const starIndex = eventData.points[0].pointIndex;
+                const star = stars[starIndex];
                 displayStarInfo(star);
             });
         }
+
+
 
         // star info
         function displayStarInfo(star) {
