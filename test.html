@@ -179,7 +179,15 @@
                 },
                 type: 'scatter'
             };
-            Plotly.newPlot(starMap, [trace]);
+            const layout = {
+                title: 'Star Map',
+                xaxis: { title: 'Longitude' },
+                yaxis: { title: 'Latitude' },
+                dragmode: 'zoom', 
+                showlegend: false,
+                hovermode: 'closest' 
+                    };
+            Plotly.newPlot(starMap, [trace], layout);
             const stars = data.stars;
             starMap.on('plotly_click', (eventData) => {
                 const starIndex = eventData.points[0].pointIndex;
@@ -187,6 +195,7 @@
                 displayStarInfo(star);
             });
         }
+
 
 
 
