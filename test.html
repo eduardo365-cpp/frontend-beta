@@ -7,7 +7,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="https://fonts.googleapis.com/css?family=Roboto:400,500&display=swap" rel="stylesheet">
     <style>
-            body {
+        body {
             margin: 0;
             font-family: 'Roboto', sans-serif;
             background-color: #121212;
@@ -112,6 +112,11 @@
             <input type="number" step="0.01" id="lon" placeholder="lon">
             <button type="submit">Generate Star Map</button>
         </form>
+        <form id="starNameForm" class="controls">
+            <label for="starName">Star Name:</label>
+            <input type="text" id="starName" placeholder="Enter star name">
+            <button type="submit">Locate Star</button>
+        </form>
         <div class="controls">
             <button id="nightVisionBtn">Night Vision</button>
             <button id="locateMeBtn">Use My Location</button>
@@ -125,12 +130,12 @@
         const body = document.body;
         const starMap = document.getElementById('star-map');
 
-        // 
+        // night mode
         nightVisionBtn.addEventListener('click', () => {
             body.classList.toggle('night-mode');
         });
 
-        // 
+        // Generate star map
         const coordinateForm = document.getElementById('coordinateForm');
         coordinateForm.addEventListener('submit', (event) => {
             event.preventDefault();
@@ -139,50 +144,82 @@
             generateStarMap(lat, lon);
         });
 
-        // AJAX
-        ///
-        ///此段114-161可註解///
-        function generateStarMap(lat, lon) {
-            $.ajax({
-                url: '/generate_star_map',
-                type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify({ lat: lat, lon: lon }),
-                success: function (data) {
-                    console.log('Star map data:', data);
-                    // 更新
-                    updateStarMap(data);
-                },
-                error: function (error) {
-                    console.log('Error:', error);
-                }
-            });
-        }
-        ///
+        // Locate star
+        const starNameForm = document.getElementById('starNameForm');
+        starNameForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const starName = document.getElementById('starName').value;
+            locateStarByName(starName);
+        });
 
-        ///fetch stars
+        // Fetch stars
         function generateStarMap(lat, lon, magnitude, constellation) {
             fetch(`/stars/?lat=${lat}&lon=${lon}&magnitude=${magnitude}&constellation=${constellation}`)
                 .then(response => response.json())
                 .then(data => {
-                    console.log(data);
+                    updateStarMap(data);
                 })
                 .catch(error => {
                     console.error('Error:', error);
                 });
         }
 
+        // 
         function updateStarMap(data) {
             const starInfoDiv = document.getElementById('star-info');
             starInfoDiv.innerHTML = `<h2>Star Map for Coordinates: ${data.lat}, ${data.lon}</h2>`;
-            data.constellations.forEach(constellation => {
-                const starDetail = document.createElement('div');
-                starDetail.innerHTML = `<p>${constellation.name} - Brightness: ${constellation.brightness}</p>`;
-                starInfoDiv.appendChild(starDetail);
+            const trace = {
+                x: data.stars.map(star => star.lon),
+                y: data.stars.map(star => star.lat),
+                text: data.stars.map(star => star.name),
+                mode: 'markers',
+                marker: {
+                    size: 10,
+                    color: 'yellow',
+                },
+                type: 'scatter'
+            };
+
+           
+            Plotly.newPlot(starMap, [trace]);
+
+            
+            starMap.on('plotly_click', (data) => {
+                const starIndex = data.points[0].pointIndex;
+                const star = data.stars[starIndex];
+                displayStarInfo(star);
             });
         }
 
-        // 
+        // star info
+        function displayStarInfo(star) {
+            const starInfoDiv = document.getElementById('star-info');
+            starInfoDiv.innerHTML = `<h2>${star.name}</h2>
+                                    <p>Brightness: ${star.brightness}</p>
+                                    <p>Constellation: ${star.constellation}</p>
+                                    <p>Coordinates: (${star.lat}, ${star.lon})</p>`;
+        }
+
+        // Locate star by name
+        function locateStarByName(starName) {
+            fetch(`/stars/search?name=${starName}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data) {
+                        const { lat, lon } = data.location;
+                        document.getElementById('lat').value = lat;
+                        document.getElementById('lon').value = lon;
+                        generateStarMap(lat, lon);
+                    } else {
+                        alert('Star not found');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+
+        // geolocation
         const locateMeBtn = document.getElementById('locateMeBtn');
         locateMeBtn.addEventListener('click', () => {
             if (navigator.geolocation) {
