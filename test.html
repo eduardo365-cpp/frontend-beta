@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <title>Star Map Viewer</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="https://fonts.googleapis.com/css?family=Roboto:400,500&display=swap" rel="stylesheet">
     <style>
-        body {
+            body {
             margin: 0;
             font-family: 'Roboto', sans-serif;
             background-color: #121212;
@@ -110,28 +110,27 @@
             <input type="number" step="0.01" id="lat" placeholder="lat">
             <label for="lon">Lon：</label>
             <input type="number" step="0.01" id="lon" placeholder="lon">
-            <button type="submit">generateStarMap</button>
+            <button type="submit">Generate Star Map</button>
         </form>
         <div class="controls">
-            <button id="nightVisionBtn">nightVision</button>
+            <button id="nightVisionBtn">Night Vision</button>
             <button id="locateMeBtn">Use My Location</button>
         </div>
         <div id="star-map" data-mode="day"></div>
         <div id="star-info"></div>
     </div>
 
-    <!-- JavaScript  -->
     <script>
         const nightVisionBtn = document.getElementById('nightVisionBtn');
         const body = document.body;
         const starMap = document.getElementById('star-map');
 
-        // Night Vision
+        // 
         nightVisionBtn.addEventListener('click', () => {
             body.classList.toggle('night-mode');
         });
 
-        // coordinates
+        // 
         const coordinateForm = document.getElementById('coordinateForm');
         coordinateForm.addEventListener('submit', (event) => {
             event.preventDefault();
@@ -140,7 +139,35 @@
             generateStarMap(lat, lon);
         });
 
-        // API
+        // AJAX
+        function generateStarMap(lat, lon) {
+            $.ajax({
+                url: '/generate_star_map',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ lat: lat, lon: lon }),
+                success: function (data) {
+                    console.log('Star map data:', data);
+                    // 更新
+                    updateStarMap(data);
+                },
+                error: function (error) {
+                    console.log('Error:', error);
+                }
+            });
+        }
+
+        function updateStarMap(data) {
+            const starInfoDiv = document.getElementById('star-info');
+            starInfoDiv.innerHTML = `<h2>Star Map for Coordinates: ${data.lat}, ${data.lon}</h2>`;
+            data.constellations.forEach(constellation => {
+                const starDetail = document.createElement('div');
+                starDetail.innerHTML = `<p>${constellation.name} - Brightness: ${constellation.brightness}</p>`;
+                starInfoDiv.appendChild(starDetail);
+            });
+        }
+
+        // 
         const locateMeBtn = document.getElementById('locateMeBtn');
         locateMeBtn.addEventListener('click', () => {
             if (navigator.geolocation) {
@@ -155,24 +182,6 @@
                 alert('Geolocation is not supported by your browser.');
             }
         });
-
-       
-        function generateStarMap(lat, lon) {
-            console.log(`generateStarMap，view point：Lat ${lat}, Lon ${lon}`);
-        }
-
-        // Device Orientation API
-        if (window.DeviceOrientationEvent) {
-            window.addEventListener('deviceorientation', event => {
-                const alpha = event.alpha;  // z-axis (0-360
-                const beta = event.beta;    // x-axis (-180 - 180
-                const gamma = event.gamma;  // y-axis (-90 - 90
-                
-                
-                console.log(`alpha: ${alpha}, beta: ${beta}, gamma: ${gamma}`);
-                // rotateStarMap(alpha, beta, gamma);
-            });
-        }
     </script>
 </body>
 </html>
