@@ -159,6 +159,8 @@
             });
         }
         ///
+
+        ///fetch stars
         function generateStarMap(lat, lon, magnitude, constellation) {
             fetch(`/stars/?lat=${lat}&lon=${lon}&magnitude=${magnitude}&constellation=${constellation}`)
                 .then(response => response.json())
