@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Star Map Viewer</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Roboto', sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            transition: background-color 0.5s, color 0.5s;
+        }
+        header {
+            background-color: #1e1e1e;
+            padding: 20px;
+            text-align: center;
+        }
+        header h1 {
+            margin: 0;
+            font-weight: 500;
+        }
+        .container {
+            padding: 20px;
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .controls label {
+            margin: 0 5px;
+        }
+        .controls input {
+            margin: 0 10px;
+            padding: 5px;
+            width: 120px;
+            background-color: #1e1e1e;
+            border: 1px solid #ffffff;
+            color: #ffffff;
+        }
+        .controls button {
+            margin: 10px;
+            padding: 10px 20px;
+            background-color: #2979ff;
+            color: #ffffff;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .controls button:hover {
+            background-color: #1565c0;
+        }
+        #star-map {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #ffffff;
+            transition: filter 0.5s;
+        }
+        #star-info {
+            margin-top: 20px;
+            background-color: #1e1e1e;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        #star-info h2 {
+            margin-top: 0;
+        }
+        .night-mode {
+            background-color: #000000;
+            color: #ff5555;
+        }
+        .night-mode #star-map {
+            filter: brightness(50%) sepia(100%) hue-rotate(300deg) saturate(300%);
+        }
+        .night-mode .controls input {
+            background-color: #000000;
+            border: 1px solid #ff5555;
+        }
+        .night-mode .controls button {
+            background-color: #ff5555;
+            color: #000000;
+        }
+        .night-mode .controls button:hover {
+            background-color: #ff3333;
+        }
+        @media (max-width: 600px) {
+            .controls {
+                flex-direction: column;
+            }
+            .controls input {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Star Map Viewer</h1>
+    </header>
+    <div class="container">
+        <form id="coordinateForm" class="controls">
+            <label for="lat">Lat：</label>
+            <input type="number" step="0.01" id="Lat" placeholder="lat">
+            <label for="lon">Lon：</label>
+            <input type="number" step="0.01" id="Lon" placeholder="lon">
+            <button type="submit">generateStarMap</button>
+        </form>
+        <div class="controls">
+            <button id="nightVisionBtn">nightVision</button>
+        </div>
+        <div id="star-map" data-mode="day"></div>
+        <div id="star-info"></div>
+    </div>
+
+    <!-- JavaScript  -->
+    <script>
+        const nightVisionBtn = document.getElementById('nightVisionBtn');
+        const body = document.body;
+        const starMap = document.getElementById('star-map');
+
+        nightVisionBtn.addEventListener('click', () => {
+            body.classList.toggle('night-mode');
+        });
+
+        const coordinateForm = document.getElementById('coordinateForm');
+        coordinateForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const lat = document.getElementById('lat').value;
+            const lon = document.getElementById('lon').value;
+            generateStarMap(lat, lon);
+        });
+
+        function generateStarMap(lat, lon) {
+            console.log(`generateStarMap，view point：Lat ${lat}, Lon ${lon}`);
+        }
+    </script>
+</body>
+</html>
